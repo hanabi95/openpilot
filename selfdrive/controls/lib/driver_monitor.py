@@ -112,7 +112,7 @@ class DriverStatus():
     self.is_rhd_region_checked = False
 
     # dragonpilot
-    self.awareness_time = 70.
+    self.awareness_time = 300.
 
     self._set_timers(active_monitoring=True)
 
