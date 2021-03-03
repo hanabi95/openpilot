@@ -59,7 +59,10 @@ class CarState(CarStateBase):
     self.main_on = bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
     ret.espDisabled = pt_cp.vl["ESPStatus"]['TractionControlOn'] != 1
     self.pcm_acc_status = pt_cp.vl["ASCMActiveCruiseControlStatus"]['ACCCmdActive']
-    ret.cruiseState.available = self.main_on
+    if self.CP.enableGasInterceptor:
+      ret.cruiseState.available = not bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
+    else:
+      ret.cruiseState.available = bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
     ret.cruiseState.enabled = self.pcm_acc_status != 0
     ret.cruiseState.standstill = False
 
