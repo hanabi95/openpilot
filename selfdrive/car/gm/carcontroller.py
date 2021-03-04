@@ -90,11 +90,6 @@ class CarController():
         # send exactly zero if apply_gas is zero. Interceptor will send the max between read value and apply_gas.
         # This prevents unexpected pedal range rescaling
         can_sends.append(create_gas_command(self.packer_pt, pedal_gas, idx))
-    
-    # Send dashboard UI commands (ACC status), 25hz
-    if (frame % 4) == 0:
-        can_sends.append(gmcan.create_acc_dashboard_command(self.packer_pt, CanBus.POWERTRAIN, enabled, hud_v_cruise * CV.MS_TO_KPH, hud_show_car))
-
 
     # Send dashboard UI commands (ACC status), 25hz
     if (frame % 4) == 0:
