@@ -155,7 +155,6 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerLimitTimer = 0.4
     ret.radarTimeStep = 0.0667  # GM radar runs at 15Hz instead of standard 20Hz
-    print(f'oplong = {ret.openpilotLongitudinalControl}')
     return ret
 
   # returns a car.CarState

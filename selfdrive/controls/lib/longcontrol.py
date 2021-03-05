@@ -72,6 +72,8 @@ class LongControl():
     gas_max = interp(CS.vEgo, CP.gasMaxBP, CP.gasMaxV)
     brake_max = interp(CS.vEgo, CP.brakeMaxBP, CP.brakeMaxV)
 
+    print(f'Actuators vva: {v_target}, {v_target_future} {a_target}')
+
     # Update state machine
     output_gb = self.last_output_gb
     self.long_control_state = long_control_state_trans(active, self.long_control_state, CS.vEgo,
@@ -94,7 +96,7 @@ class LongControl():
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
       prevent_overshoot = not CP.stoppingControl and CS.vEgo < 1.5 and v_target_future < 0.7
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
-
+      print(f'Actuator PIDs: {self.pid.k_p} {self.pid.k_i}')
       output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
 
       if prevent_overshoot:
@@ -116,7 +118,6 @@ class LongControl():
       self.reset(CS.vEgo)
 
     self.last_output_gb = output_gb
-    print(f'Actuators GB: {output_gb}, {gas_max} {brake_max}')
     final_gas = clip(output_gb, 0., gas_max)
     final_brake = -clip(output_gb, -brake_max, 0.)
 
