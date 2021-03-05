@@ -131,6 +131,17 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       return 0;
     }
   
+    // exit controls on rising edge of gas press if interceptor (0x201 w/ len = 6)
+    if (addr == 0x201) {
+      gas_interceptor_detected = 1;
+      int gas_interceptor = GET_INTERCEPTOR(to_push);
+      if ((gas_interceptor > GM_GAS_INTERCEPTOR_THRESHOLD) &&
+          (gas_interceptor_prev <= GM_GAS_INTERCEPTOR_THRESHOLD)) {
+        //controls_allowed = 0; //TODO: gas press causes controls failed. It's better if gas doesn't cancel anyway...
+      }
+      gas_interceptor_prev = gas_interceptor;
+    }
+
 
 
     if (addr == 388) {
@@ -155,7 +166,6 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
           controls_allowed = 1;
           break;
         case 6:  // cancel
-          //temp disable cancel button for testing
           if (!gas_interceptor_detected) {
             controls_allowed = 0;
           }
@@ -178,19 +188,6 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
          controls_allowed = 0;
       }
       gm_brake_prev = brake;
-    }
-
-
-
-    // exit controls on rising edge of gas press if interceptor (0x201 w/ len = 6)
-    if (addr == 0x201) {
-      gas_interceptor_detected = 1;
-      int gas_interceptor = GET_INTERCEPTOR(to_push);
-      if ((gas_interceptor > GM_GAS_INTERCEPTOR_THRESHOLD) &&
-          (gas_interceptor_prev <= GM_GAS_INTERCEPTOR_THRESHOLD)) {
-        controls_allowed = 0; //TODO: remove / fix (probably problem with threshold)
-      }
-      gas_interceptor_prev = gas_interceptor;
     }
 
     // exit controls on rising edge of gas press
@@ -247,16 +244,19 @@ static int gm_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
 
   // disallow actuator commands if gas or brake (with vehicle moving) are pressed
   // and the the latching controls_allowed flag is True
-  // int pedal_pressed = gm_gas_prev || (gas_interceptor_prev > GM_GAS_INTERCEPTOR_THRESHOLD) ||
-  //                     (gm_brake_prev && gm_moving);
-  //only disabling whne brake is pressed
-  int pedal_pressed = (gm_brake_prev && gm_moving);
+   int pedal_pressed = gm_gas_prev || (gas_interceptor_prev > GM_GAS_INTERCEPTOR_THRESHOLD) ||
+                       (gm_brake_prev && gm_moving);
+
+  if (gas_interceptor_detected) {
+    //When using pedal, do not disable when gas pressed
+    pedal_pressed = (gm_brake_prev && gm_moving);
+  }
 
   bool current_controls_allowed = controls_allowed && !(pedal_pressed);
 
 
 
-  // GAS: safety check
+  // GAS: Interceptor safety check
   if (addr == 0x200) {
     if (!current_controls_allowed) {
       if (GET_BYTE(to_send, 0) || GET_BYTE(to_send, 1)) {
@@ -331,14 +331,14 @@ static int gm_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
 
     // reset to 0 if either controls is not allowed or there's a violation
     if (violation || !current_controls_allowed) {
-      puts("no steer reset to zero");
+      //puts("no steer reset to zero");
       gm_desired_torque_last = 0;
       gm_rt_torque_last = 0;
       gm_ts_last = ts;
     }
 
     if (violation) {
-      puts("no steer violation");
+      //puts("no steer violation");
       //Replace payload with appropriate zero value for expected rolling counter
       to_send->RDLR = vals[rolling_counter];
     }
@@ -362,10 +362,10 @@ static int gm_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       tx = 0;
     }
   }
-  puth(addr);
-  puts(": ");
-  puth(tx);
-  puts("\n");
+  // puth(addr);
+  // puts(": ");
+  // puth(tx);
+  // puts("\n");
   //1 allows the message through
   return tx;
 }
@@ -399,10 +399,11 @@ static int gm_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
 
 
 static CAN_FIFOMailBox_TypeDef * gm_pump_hook(void) {
-  //for now, we are only concerned with brake pedal being pressed
-  volatile int pedal_pressed = (volatile int)gm_brake_prev && (volatile int)gm_moving;
+  volatile int pedal_pressed = (volatile int)gm_gas_prev || ((volatile int)gm_brake_prev && (volatile int)gm_moving);
+  if (gas_interceptor_detected) {
+    pedal_pressed = (volatile int)gm_brake_prev && (volatile int)gm_moving;
+  }
 
-  //volatile int pedal_pressed = (volatile int)gm_gas_prev || ((volatile int)gm_brake_prev && (volatile int)gm_moving);
   volatile bool current_controls_allowed = (volatile bool)controls_allowed && !(volatile int)pedal_pressed;
 
   if (!gm_ffc_detected) {
@@ -412,7 +413,7 @@ static CAN_FIFOMailBox_TypeDef * gm_pump_hook(void) {
     gm_apply_buffer(&gm_lkas_buffer, false);
     //In OP only mode we need to send zero if controls are not allowed
     if (!current_controls_allowed) {
-      puts("current controls not allowed...\n");
+      //puts("current controls not allowed...\n");
       gm_lkas_buffer.current_frame.RDLR = 0U;
       gm_lkas_buffer.current_frame.RDHR = 0U;
     }
@@ -471,9 +472,9 @@ static CAN_FIFOMailBox_TypeDef * gm_pump_hook(void) {
   gm_lkas_buffer.current_frame.RDLR &= 0x0000FFFF;
   gm_lkas_buffer.current_frame.RDLR |= (checksumswap << 16);
 
-  puts("lkas command: ");
-  puth(gm_lkas_buffer.current_frame.RDLR);
-  puts("\n");
+  // puts("lkas command: ");
+  // puth(gm_lkas_buffer.current_frame.RDLR);
+  // puts("\n");
 
   return (CAN_FIFOMailBox_TypeDef*)&gm_lkas_buffer.current_frame;
 }
