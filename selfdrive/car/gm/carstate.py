@@ -63,8 +63,8 @@ class CarState(CarStateBase):
       ret.cruiseState.available = not bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
     else:
       ret.cruiseState.available = bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
-    ret.cruiseState.enabled = self.pcm_acc_status != 0
-    ret.cruiseState.standstill = False
+    ret.cruiseState.enabled = self.pcm_acc_status != AccState.OFF
+    ret.cruiseState.standstill = self.pcm_acc_status == AccState.STANDSTILL
 
     ret.brakePressed = ret.brake > 1e-5
     # Regen braking is braking
