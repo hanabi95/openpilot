@@ -36,9 +36,6 @@
 #define COLOR_WHITE_ALPHA(x) nvgRGBA(255, 255, 255, x)
 #define COLOR_YELLOW nvgRGBA(218, 202, 37, 255)
 #define COLOR_RED nvgRGBA(201, 34, 49, 255)
-#define COLOR_GREEN_SPEED nvgRGBA(0, 204, 0, 255)
-#define COLOR_YELLOW_SPEED nvgRGBA(255, 204, 0, 255)
-#define COLOR_RED_SPEED nvgRGBA(204, 0, 0, 255)
 
 #define UI_BUF_COUNT 4
 
@@ -103,7 +100,7 @@ typedef struct UIScene {
   bool world_objects_visible;
 
   bool is_rhd;
-  bool frontview;
+  bool driver_view;
 
   std::string alert_text1;
   std::string alert_text2;
@@ -135,23 +132,9 @@ typedef struct UIScene {
   // lead
   vertex_data lead_vertices[2];
 
-  //kegman UI
-  int lead_status;
-  float lead_d_rel, lead_v_rel;
-  float angleSteers;
-  bool brakeLights;
-  float angleSteersDes;
-  bool recording;
-  float gpsAccuracyUblox;
-  float altitudeUblox;
-  float hvBpower;
-  float output_scale;
-  float steeringTorqueEps;
-  float aEgo;
-  float cpuTemp;
-  bool leftBlinker;
-  bool rightBlinker;
-  int blinker_blinkingrate;
+  float light_sensor, accel_sensor, gyro_sensor;
+  bool started, ignition, is_metric, longitudinal_control;
+  uint64_t started_frame;
 } UIScene;
 
 typedef struct UIState {
@@ -186,13 +169,6 @@ typedef struct UIState {
 
   // device state
   bool awake;
-  float light_sensor, accel_sensor, gyro_sensor;
-
-  bool started;
-  bool ignition;
-  bool is_metric;
-  bool longitudinal_control;
-  uint64_t started_frame;
 
   bool sidebar_collapsed;
   Rect video_rect, viz_rect;
