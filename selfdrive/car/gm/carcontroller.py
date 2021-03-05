@@ -26,6 +26,7 @@ def actuator_hystereses(final_pedal, pedal_steady):
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
+    self.pedal_steady = 0.
     self.start_time = 0.
     self.apply_steer_last = 0
     self.lka_icon_status_last = (False, False)
