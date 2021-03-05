@@ -2,12 +2,16 @@
 from cereal import car
 from selfdrive.config import Conversions as CV
 from selfdrive.car.gm.values import CAR, CruiseButtons, \
-                                    AccState
+                                    AccState, NO_ASCM_CARS
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
+from selfdrive.controls.lib.events import Events
+from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX
 
 ButtonType = car.CarState.ButtonEvent.Type
 EventName = car.CarEvent.EventName
+GearShifter = car.CarState.GearShifter
+MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS  # 135 + 4 = 86 mph
 
 class CarInterface(CarInterfaceBase):
 
@@ -215,6 +219,47 @@ class CarInterface(CarInterfaceBase):
     self.CS.out = ret.as_reader()
 
     return self.CS.out
+
+  # Override create_common_events locally to handle a special case for the Bolt EV.
+  def create_common_events(self, cs_out, extra_gears=[], gas_resume_speed=-1):  # pylint: disable=dangerous-default-value
+    events = Events()
+
+    if cs_out.doorOpen:
+      events.add(EventName.doorOpen)
+    if cs_out.seatbeltUnlatched:
+      events.add(EventName.seatbeltNotLatched)
+    if cs_out.gearShifter != GearShifter.drive and cs_out.gearShifter not in extra_gears:
+      events.add(EventName.wrongGear)
+    if cs_out.gearShifter == GearShifter.reverse:
+      events.add(EventName.reverseGear)
+    if not cs_out.cruiseState.available:
+      events.add(EventName.wrongCarMode)
+    if cs_out.espDisabled:
+      events.add(EventName.espDisabled)
+    if cs_out.stockFcw:
+      events.add(EventName.stockFcw)
+    if cs_out.stockAeb:
+      events.add(EventName.stockAeb)
+    if cs_out.vEgo > MAX_CTRL_SPEED:
+      events.add(EventName.speedTooHigh)
+
+    if cs_out.steerError:
+      events.add(EventName.steerUnavailable)
+    elif cs_out.steerWarning:
+      events.add(EventName.steerTempUnavailable)
+
+    # Disable on rising edge of gas or brake. Also disable on brake when speed > 0.
+    if cs_out.brakePressed and (not self.CS.out.brakePressed or not cs_out.standstill):
+      events.add(EventName.pedalPressed)
+    # For the Bolt EV, we want OP to manage cruise state when there's a pedal 
+    # interceptor, so ignore these events
+    if not (self.CP.enableGasInterceptor and self.CP.carFingerprint in NO_ASCM_CARS):
+      if cs_out.cruiseState.enabled and not self.CS.out.cruiseState.enabled:
+        events.add(EventName.pcmEnable)
+      elif not cs_out.cruiseState.enabled:
+        events.add(EventName.pcmDisable)
+
+    return events
 
   def apply(self, c):
     hud_v_cruise = c.hudControl.setSpeed
