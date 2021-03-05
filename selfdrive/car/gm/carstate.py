@@ -38,8 +38,13 @@ class CarState(CarStateBase):
     if ret.brake < 10/0xd0:
       ret.brake = 0.
 
+
     ret.gas = pt_cp.vl["AcceleratorPedal"]['AcceleratorPedal'] / 254.
-    ret.gasPressed = ret.gas > 1e-5
+    # Debug step for gas interceptor
+    if not self.CP.enableGasInterceptor:
+      ret.gasPressed = ret.gas > 1e-5
+    else:
+      ret.gasPressed = False
 
     ret.steeringTorque = pt_cp.vl["PSCMStatus"]['LKADriverAppldTrq']
     ret.steeringTorqueEps = pt_cp.vl["PSCMStatus"]['LKATotalTorqueDelivered']
