@@ -64,6 +64,7 @@ class CarState(CarStateBase):
     else:
       ret.cruiseState.available = bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
     ret.cruiseState.enabled = self.pcm_acc_status != AccState.OFF
+    print(f'buttons:{ret.cruiseState.enabled},{ret.cruiseState.available}')
     ret.cruiseState.standstill = self.pcm_acc_status == AccState.STANDSTILL
 
     ret.brakePressed = ret.brake > 1e-5
