@@ -57,7 +57,6 @@ VAL_TABLE_ LKATorqueDeliveredStatus 3 "Failed" 2 "Temp. Limited" 1 "Active" 0 "I
 VAL_TABLE_ HandsOffSWDetectionStatus 1 "Hands On" 0 "Hands Off" ;
 VAL_TABLE_ HandsOffSWDetectionMode 2 "Failed" 1 "Enabled" 0 "Disabled" ;
 
-
 BO_ 189 EBCMRegenPaddle: 7 K17_EBCM
  SG_ RegenPaddle : 7|4@0+ (1,0) [0|0] ""  NEO
 
@@ -116,7 +115,7 @@ BO_ 388 PSCMStatus: 8 K43_PSCM
  SG_ LKATorqueDelivered : 18|11@0- (0.01,0) [0|1] "" NEO
  SG_ LKATotalTorqueDelivered : 2|11@0- (0.01,0) [-10.24|10.23] "Nm" NEO
 
-BO_ 417 AcceleratorPedal: 7 XXX
+BO_ 417 AcceleratorPedal: 8 XXX
  SG_ AcceleratorPedal : 55|8@0+ (1,0) [0|0] ""  NEO
 
 BO_ 451 GasAndAcc: 8 XXX
@@ -141,6 +140,22 @@ BO_ 489 EBCMVehicleDynamic: 8 K17_EBCM
  SG_ LateralAcceleration : 3|10@0- (0.161,0) [-2047|2047] "m/s2" NEO
  SG_ YawRate : 35|12@0- (0.625,0) [0|1] "" NEO
  SG_ YawRate2 : 51|12@0- (0.0625,0) [-2047|2047] "grad/s" NEO
+
+BO_ 512 GAS_COMMAND: 6 EON
+ SG_ GAS_COMMAND : 7|16@0+ (0.125677,-75.909) [0|1] "" INTERCEPTOR
+ SG_ GAS_COMMAND2 : 23|16@0+ (0.251976,-76.601) [0|1] "" INTERCEPTOR
+ SG_ ENABLE : 39|1@0+ (1,0) [0|1] "" INTERCEPTOR
+ SG_ COUNTER_PEDAL : 35|4@0+ (1,0) [0|15] "" INTERCEPTOR
+ SG_ CHECKSUM_PEDAL : 47|8@0+ (1,0) [0|255] "" INTERCEPTOR
+
+BO_ 513 GAS_SENSOR: 6 INTERCEPTOR
+ SG_ INTERCEPTOR_GAS : 7|16@0+ (0.125677,-75.909) [0|1] "" EON
+ SG_ INTERCEPTOR_GAS2 : 23|16@0+ (0.251976,-76.601) [0|1] "" EON
+ SG_ STATE : 39|4@0+ (1,0) [0|15] "" EON
+ SG_ COUNTER_PEDAL : 35|4@0+ (1,0) [0|15] "" EON
+ SG_ CHECKSUM_PEDAL : 47|8@0+ (1,0) [0|255] "" EON
+
+VAL_ 513 STATE 5 "FAULT_TIMEOUT" 4 "FAULT_STARTUP" 3 "FAULT_SCE" 2 "FAULT_SEND" 1 "FAULT_BAD_CHECKSUM" 0 "NO_FAULT" ;
 
 BO_ 560 EPBStatus: 8 EPB
  SG_ EPBClosed : 12|1@0+ (1,0) [0|1] ""  NEO
@@ -170,7 +185,7 @@ BO_ 840 EBCMWheelSpdFront: 4 K17_EBCM
  SG_ FLWheelSpd : 7|16@0+ (0.0311,0) [0|255] "km/h"  NEO
  SG_ FRWheelSpd : 23|16@0+ (0.0311,0) [0|255] "km/h"  NEO
 
-BO_ 842 EBCMWheelSpdRear: 5 K17_EBCM
+BO_ 842 EBCMWheelSpdRear: 4 K17_EBCM
  SG_ RLWheelSpd : 7|16@0+ (0.0311,0) [0|255] "km/h"  NEO
  SG_ RRWheelSpd : 23|16@0+ (0.0311,0) [0|255] "km/h"  NEO
 
