@@ -72,8 +72,6 @@ class LongControl():
     gas_max = interp(CS.vEgo, CP.gasMaxBP, CP.gasMaxV)
     brake_max = interp(CS.vEgo, CP.brakeMaxBP, CP.brakeMaxV)
 
-    print(f'Actuators vva: {v_target}, {v_target_future} {a_target}')
-
     # Update state machine
     output_gb = self.last_output_gb
     self.long_control_state = long_control_state_trans(active, self.long_control_state, CS.vEgo,

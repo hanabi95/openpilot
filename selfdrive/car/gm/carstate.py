@@ -40,7 +40,8 @@ class CarState(CarStateBase):
 
 
     ret.gas = pt_cp.vl["AcceleratorPedal"]['AcceleratorPedal'] / 254.
-    # Debug step for gas interceptor
+    # Disable gaspress event for gas interceptor, indistinguishable
+    # TODO: compute whether user is applying gas, and use that to disable OP
     if not self.CP.enableGasInterceptor:
       ret.gasPressed = ret.gas > 1e-5
     else:

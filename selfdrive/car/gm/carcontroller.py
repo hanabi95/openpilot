@@ -91,8 +91,6 @@ class CarController():
         idx = (frame // 4) % 4
         # send exactly zero if apply_gas is zero. Interceptor will send the max between read value and apply_gas.
         # This prevents unexpected pedal range rescaling
-        if enabled:
-          print(f'interceptor: gas at {pedal_gas} asking for {actuators.gas} and {actuators.brake}')
         can_sends.append(create_gas_command(self.packer_pt, pedal_gas, idx))
 
     # Send dashboard UI commands (ACC status), 25hz
