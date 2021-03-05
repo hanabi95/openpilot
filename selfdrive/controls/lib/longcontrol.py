@@ -116,6 +116,7 @@ class LongControl():
       self.reset(CS.vEgo)
 
     self.last_output_gb = output_gb
+    print(f'Actuators GB: {output_gb}, {gas_max} {brake_max}')
     final_gas = clip(output_gb, 0., gas_max)
     final_brake = -clip(output_gb, -brake_max, 0.)
 
