@@ -184,7 +184,8 @@ class CarInterface(CarInterfaceBase):
       elif but == CruiseButtons.CANCEL:
         be.type = ButtonType.cancel
       elif but == CruiseButtons.MAIN:
-        be.type = ButtonType.altButton3
+        if not self.CP.enableGasInterceptor:
+          be.type = ButtonType.altButton3
       buttonEvents.append(be)
 
     ret.buttonEvents = buttonEvents
@@ -203,7 +204,9 @@ class CarInterface(CarInterfaceBase):
       # do enable on both accel and decel buttons
       if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
         events.add(EventName.buttonEnable)
-
+      # do disable on button down
+      if b.type == ButtonType.cancel and b.pressed:
+        events.add(EventName.buttonCancel)
     ret.events = events.to_msg()
 
     # copy back carState packet to CS
