@@ -64,16 +64,14 @@ class CarState(CarStateBase):
       ret.cruiseState.available = not bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
     else:
       ret.cruiseState.available = bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
-      ret.cruiseState.enabled = self.pcm_acc_status != AccState.OFF # Only set cruisestate enabled
-      # if we're using the built in CC, otherwise we want OP to manage cruise state enable?
-    # print(f'buttons:{ret.cruiseState.enabled},{ret.cruiseState.available}')
+    ret.cruiseState.enabled = self.pcm_acc_status != AccState.OFF
     ret.cruiseState.standstill = self.pcm_acc_status == AccState.STANDSTILL
 
-    ret.brakePressed = ret.brake > 1e-5
     # Regen braking is braking
     self.regen_pressed = False
     if self.car_fingerprint in REGEN_CARS:
       self.regen_pressed = bool(pt_cp.vl["EBCMRegenPaddle"]['RegenPaddle'])
+    ret.brakePressed = ret.brake > 1e-5 or self.regen_pressed
 
     brake_light_enable = False
     if self.car_fingerprint == CAR.BOLT:

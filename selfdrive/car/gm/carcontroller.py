@@ -85,7 +85,8 @@ class CarController():
       # apply pedal hysteresis and clip the final output to valid values.
       final_pedal, self.pedal_steady = actuator_hystereses(final_pedal, self.pedal_steady)
       pedal_gas = clip(final_pedal, 0., 1.)
-      #pedal_gas = clip(actuators.gas, 0., 1.)
+      print(f'interceptor: gas at {final_pedal}')
+
       if (frame % 4) == 0:
         idx = (frame // 4) % 4
         # send exactly zero if apply_gas is zero. Interceptor will send the max between read value and apply_gas.
