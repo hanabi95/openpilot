@@ -24,6 +24,7 @@ def actuator_hystereses(final_pedal, pedal_steady):
 
   return final_pedal, pedal_steady
 
+last_logged_pedal = 0.0
 class CarController():
   def __init__(self, dbc_name, CP, VM):
     self.pedal_steady = 0.
@@ -85,12 +86,14 @@ class CarController():
       # apply pedal hysteresis and clip the final output to valid values.
       final_pedal, self.pedal_steady = actuator_hystereses(final_pedal, self.pedal_steady)
       pedal_gas = clip(final_pedal, 0., 1.)
-      print(f'interceptor: gas at {final_pedal}')
 
       if (frame % 4) == 0:
         idx = (frame // 4) % 4
         # send exactly zero if apply_gas is zero. Interceptor will send the max between read value and apply_gas.
         # This prevents unexpected pedal range rescaling
+        if pedal_gas > 0.0 and pedal_gas != last_logged_pedal:
+          print(f'interceptor: gas at {pedal_gas}')
+          last_logged_pedal = pedal_gas
         can_sends.append(create_gas_command(self.packer_pt, pedal_gas, idx))
 
     # Send dashboard UI commands (ACC status), 25hz
