@@ -1,7 +1,10 @@
 #pragma once
 
+#include <QNetworkReply>
 #include <QVBoxLayout>
 #include <QWidget>
+
+#include "api.hpp"
 
 class DriveStats : public QWidget {
   Q_OBJECT

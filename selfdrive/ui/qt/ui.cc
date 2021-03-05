@@ -14,10 +14,6 @@ int main(int argc, char *argv[]) {
 #endif
   QSurfaceFormat::setDefaultFormat(fmt);
 
-#ifdef QCOM
-  QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
-#endif
-
   QApplication a(argc, argv);
   MainWindow w;
   setMainWindow(&w);

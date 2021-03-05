@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QLabel>
+#include <QNetworkReply>
 #include <QStackedLayout>
 #include <QWidget>
 
