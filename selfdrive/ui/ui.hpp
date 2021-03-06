@@ -36,9 +36,6 @@
 #define COLOR_WHITE_ALPHA(x) nvgRGBA(255, 255, 255, x)
 #define COLOR_YELLOW nvgRGBA(218, 202, 37, 255)
 #define COLOR_RED nvgRGBA(201, 34, 49, 255)
-#define COLOR_GREEN_SPEED nvgRGBA(0, 204, 0, 255)
-#define COLOR_YELLOW_SPEED nvgRGBA(255, 204, 0, 255)
-#define COLOR_RED_SPEED nvgRGBA(204, 0, 0, 255)
 
 #define UI_BUF_COUNT 4
 
@@ -77,7 +74,7 @@ typedef enum UIStatus {
 } UIStatus;
 
 static std::map<UIStatus, NVGcolor> bg_colors = {
-#ifndef QT_GUI_LIB
+#ifdef QCOM
   {STATUS_OFFROAD, nvgRGBA(0x07, 0x23, 0x39, 0xf1)},
 #else
   {STATUS_OFFROAD, nvgRGBA(0x0, 0x0, 0x0, 0xff)},
@@ -134,24 +131,6 @@ typedef struct UIScene {
 
   // lead
   vertex_data lead_vertices[2];
-
-  //kegman UI
-  int lead_status;
-  float lead_d_rel, lead_v_rel;
-  float angleSteers;
-  bool brakeLights;
-  float angleSteersDes;
-  bool recording;
-  float gpsAccuracyUblox;
-  float altitudeUblox;
-  float hvBpower;
-  float output_scale;
-  float steeringTorqueEps;
-  float aEgo;
-  float cpuTemp;
-  bool leftBlinker;
-  bool rightBlinker;
-  int blinker_blinkingrate;
 } UIScene;
 
 typedef struct UIState {
