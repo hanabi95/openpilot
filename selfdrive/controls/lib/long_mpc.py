@@ -13,7 +13,7 @@ LOG_MPC = os.environ.get('LOG_MPC', False)
 
 STOPPING_DISTANCE = 2  # distance between you and lead car when you come to stop
 VEL = [0.0, 2.778, 5.556, 8.333, 11.111, 13.889, 16.667, 19.444, 22.222, 25.0, 27.778]  # velocities
-DIST = [1.8, 1.8, 1.85, 1.85, 1.9, 1.95, 2.0, 2.0, 2.0, 2.0, 2.0]
+DIST = [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5]
 
 class LongitudinalMpc():
   def __init__(self, mpc_id):

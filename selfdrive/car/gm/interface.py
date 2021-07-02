@@ -151,16 +151,16 @@ class CarInterface(CarInterfaceBase):
     ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront,
                                                                          tire_stiffness_factor=tire_stiffness_factor)
 
-    ret.longitudinalTuning.kpBP = [0., 30.]
-    ret.longitudinalTuning.kpV = [0.4, 0.45]
-    ret.longitudinalTuning.kiBP = [0.]
-    ret.longitudinalTuning.kiV = [0.05]
-    ret.longitudinalTuning.kfBP = [0., 13.889, 27.778]
-    ret.longitudinalTuning.kfV = [1., 0.5, 0.2]
+    ret.longitudinalTuning.kpBP = [0.0, 5.0, 35.0] #CRV_EU
+    ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5] #CRV_EU
+    ret.longitudinalTuning.kiBP = [0., 35.] #CRV_EU
+    ret.longitudinalTuning.kiV = [0.18, 0.12] #CRV_EU
+    ret.longitudinalTuning.kfBP = [0.]
+    ret.longitudinalTuning.kfV = [1.]
 
     if ret.enableGasInterceptor:
-      ret.gasMaxBP = [0.0, 5.0, 9.0, 35.0]
-      ret.gasMaxV =  [0.4, 0.5, 0.7, 0.7]
+      ret.gasMaxBP = [0.]
+      ret.gasMaxV =  [0.6]  #value from honda
 
     ret.stoppingControl = True
     ret.startAccel = 1.0
@@ -211,11 +211,11 @@ class CarInterface(CarInterfaceBase):
       events.add(EventName.parkBrake)
     if ret.vEgo < self.CP.minSteerSpeed:
       events.add(car.CarEvent.EventName.belowSteerSpeed)
-    if self.CP.enableGasInterceptor:
-      if self.CS.adaptive_Cruise and ret.brakePressed:
-        events.add(EventName.pedalPressed)
-        self.CS.adaptive_Cruise = False
-        self.CS.enable_lkas = True
+    #if self.CP.enableGasInterceptor:
+    #  if self.CS.adaptive_Cruise and ret.brakePressed:
+    #    events.add(EventName.pedalPressed)
+    #    self.CS.adaptive_Cruise = False
+    #    self.CS.enable_lkas = True
 
     # handle button presses
     if not self.CS.main_on and self.CP.enableGasInterceptor:

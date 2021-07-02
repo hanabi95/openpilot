@@ -9,8 +9,19 @@ from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
-VEL = [13.889, 16.667, 22.2222]  # velocities
-MIN_PEDAL = [0., 0.05, 0.07]
+def accel_hysteresis(accel, accel_steady):
+
+  # for small accel oscillations less than 0.02, don't change the accel command
+  if accel > accel_steady + 0.02:
+    accel_steady = accel - 0.02
+  elif accel < accel_steady - 0.02:
+    accel_steady = accel + 0.02
+  accel = accel_steady
+
+  return accel, accel_steady
+
+#VEL = [13.889, 16.667, 22.2222]  # velocities
+#MIN_PEDAL = [0., 0.05, 0.07]
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
@@ -19,7 +30,6 @@ class CarController():
     self.lka_icon_status_last = (False, False)
     self.steer_rate_limited = False
     self.accel_steady = 0.
-    self.apply_pedal_last = 0.
 
     self.params = CarControllerParams()
 
@@ -51,24 +61,16 @@ class CarController():
       can_sends.append(gmcan.create_steering_control(self.packer_pt, CanBus.POWERTRAIN, apply_steer, idx, lkas_enabled))
 
     # Pedal/Regen
-    if CS.CP.enableGasInterceptor and (frame % 3) == 0:
+    if CS.CP.enableGasInterceptor and (frame % 2) == 0:
 
-      if not enabled or not CS.adaptive_Cruise:
+      if not enabled or not CS.adaptive_Cruise or CS.out.vEgo <= 16.6:
         final_pedal = 0
-        #regen_active = False
-      elif CS.adaptive_Cruise:
-        #regen_active = True if actuators.brake > 0.01 else False
-        Delta = actuators.gas - self.apply_pedal_last
-        min_pedal_speed = interp(CS.out.vEgo, VEL, MIN_PEDAL)
-        if Delta > 0:
-          pedal = 0.6 * actuators.gas + self.apply_pedal_last * 0.4
-        else:
-          pedal = self.apply_pedal_last + Delta / 10.
+      elif CS.adaptive_Cruise and CS.out.vEgo > 16.6:
+        accel = actuators.gas - actuators.brake
+        accel, self.accel_steady = accel_hysteresis(accel, self.accel_steady)
+        final_pedal = clip(accel, 0., 1.)
 
-        final_pedal = clip(pedal, min_pedal_speed, 1.)
-
-      self.apply_pedal_last = final_pedal
-      idx = (frame // 3) % 4
+      idx = (frame // 2) % 4
       can_sends.append(create_gas_command(self.packer_pt, final_pedal, idx))
 
     # Send dashboard UI commands (ACC status), 25hz
