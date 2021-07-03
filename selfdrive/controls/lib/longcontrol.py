@@ -20,8 +20,7 @@ def long_control_state_trans(active, long_control_state, v_ego, v_target, v_pid,
   """Update longitudinal control state machine"""
   stopping_target_speed = min_speed_can + STOPPING_TARGET_SPEED_OFFSET
   stopping_condition = (v_ego < 2.0 and cruise_standstill) or \
-                       (v_ego < STOPPING_EGO_SPEED and
-                       (v_pid < stopping_target_speed and v_target < stopping_target_speed)
+                       (v_ego < STOPPING_EGO_SPEED and (v_pid < stopping_target_speed and v_target < stopping_target_speed))
 
   starting_condition = v_target > STARTING_TARGET_SPEED and not cruise_standstill
 
